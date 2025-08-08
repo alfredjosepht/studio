@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Upload, X, HelpCircle, Image as ImageIcon, Wand2, PartyPopper, RefreshCw, File, ServerCrash, RotateCcw, AlertTriangle, PawPrint } from 'lucide-react';
+import { Upload, X, HelpCircle, Wand2, PartyPopper, RefreshCw, File, RotateCcw, AlertTriangle, PawPrint } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast"
 
 type AppState = 'upload' | 'preview' | 'analyzing' | 'results';
@@ -99,8 +99,8 @@ export default function AnimalMojiClient() {
   };
 
   const AppHeader = () => (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 max-w-screen-2xl items-center justify-between">
         <div className="flex items-center gap-2">
           <PawPrint className="h-6 w-6 text-primary" />
           <span className="font-bold text-lg">AnimalMoji</span>
@@ -148,13 +148,13 @@ export default function AnimalMojiClient() {
 
   const HeroSection = () => (
     <div className="text-center my-12 md:my-20">
-      <div className="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-sm font-medium mb-4">
+      <div className="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-sm font-medium mb-4 shadow-sm">
         <PawPrint className="h-4 w-4 mr-2 text-primary" />
         AI-Powered Analysis
       </div>
       <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4">
         Discover Your Animal's
-        <span className="block bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">😻 Emoji Personality</span>
+        <span className="block bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent"> Emoji Personality</span>
       </h1>
       <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
         Upload a photo of your furry (or scaly) friend and let our advanced AI reveal their unique expression through the perfect emoji match.
@@ -164,7 +164,7 @@ export default function AnimalMojiClient() {
 
   const UploadSection = () => (
     <Card 
-        className={`max-w-2xl mx-auto transition-all duration-300 ${isDragging ? 'border-primary shadow-lg' : ''}`}
+        className={`max-w-2xl mx-auto transition-all duration-300 shadow-lg ${isDragging ? 'border-primary ring-4 ring-primary/20' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -175,7 +175,7 @@ export default function AnimalMojiClient() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div 
-          className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent hover:border-primary"
+          className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent hover:border-primary transition-colors"
           onClick={() => fileInputRef.current?.click()}
         >
           <Upload className="h-12 w-12 text-muted-foreground mb-4"/>
@@ -192,7 +192,7 @@ export default function AnimalMojiClient() {
   );
 
   const PreviewSection = () => (
-    <Card className="max-w-2xl mx-auto">
+    <Card className="max-w-2xl mx-auto shadow-lg">
       <CardHeader>
         <div className="flex justify-between items-center">
           <CardTitle>Photo Preview</CardTitle>
@@ -200,7 +200,7 @@ export default function AnimalMojiClient() {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="relative aspect-square w-full rounded-lg overflow-hidden border">
+        <div className="relative aspect-square w-full rounded-lg overflow-hidden border shadow-inner">
           {image && <img src={image} alt="Animal preview" className="w-full h-full object-cover" />}
            <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-8 w-8" onClick={handleReset}>
             <X className="h-4 w-4" />
@@ -236,22 +236,23 @@ export default function AnimalMojiClient() {
                     if(!isPending) clearInterval(interval);
                     return 99;
                   }
-                  return prev + 1
+                  // Ease out effect
+                  return prev + (100 - prev) * 0.05;
               });
-          }, 50);
+          }, 100);
 
           return () => clearInterval(interval);
       }, [isPending]);
 
     return (
-        <Card className="max-w-2xl mx-auto text-center">
+        <Card className="max-w-2xl mx-auto text-center shadow-lg">
             <CardHeader>
                 <CardTitle>Analyzing... 🐾</CardTitle>
                 <CardDescription>Our AI is working its magic!</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center p-12 space-y-6">
                 <div className="relative">
-                    <PawPrint className="h-16 w-16 text-primary animate-spin"/>
+                    <PawPrint className="h-16 w-16 text-primary animate-spin" style={{animationDuration: '3s'}}/>
                 </div>
                 <Progress value={progress} className="w-full" />
                 <p className="text-sm text-muted-foreground">Please wait a moment.</p>
@@ -261,20 +262,20 @@ export default function AnimalMojiClient() {
   };
 
   const ResultsSection = () => (
-    <Card className="max-w-4xl mx-auto">
+    <Card className="max-w-4xl mx-auto shadow-lg animate-fade-in-up">
         <CardHeader className="text-center">
-            <div className="flex justify-center items-center">
-                <PartyPopper className="h-6 w-6 mr-2 text-green-500"/>
-                <CardTitle>Analysis Complete!</CardTitle>
+            <div className="inline-flex items-center rounded-lg bg-green-100 text-green-800 px-3 py-1 text-sm font-medium mx-auto">
+                <PartyPopper className="h-5 w-5 mr-2"/>
+                <CardTitle className="text-2xl text-green-800">Analysis Complete!</CardTitle>
             </div>
         </CardHeader>
-        <CardContent className="space-y-6 p-8">
+        <CardContent className="space-y-8 p-4 md:p-8">
             <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="relative aspect-square w-full rounded-lg overflow-hidden border">
+              <div className="relative aspect-square w-full rounded-xl overflow-hidden border-2 border-muted shadow-lg">
                 {image && <img src={image} alt="Animal result" className="w-full h-full object-cover" />}
               </div>
               <div className="flex flex-col items-center text-center">
-                <div className="text-8xl p-6 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full w-48 h-48 mx-auto flex items-center justify-center shadow-inner animate-bounce">
+                <div className="text-8xl md:text-9xl p-6 bg-gradient-to-br from-background to-muted rounded-full w-48 h-48 mx-auto flex items-center justify-center shadow-inner animate-bounce-slow">
                   {emoji}
                 </div>
                 <p className="text-2xl font-semibold italic text-muted-foreground mt-6">"{expression}"</p>
@@ -289,9 +290,9 @@ export default function AnimalMojiClient() {
   );
 
   return (
-    <div className="min-h-screen bg-background font-sans antialiased relative">
-        <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
-          <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_50%_200px,#fbe2e3,transparent)]"></div>
+    <div className="min-h-screen bg-background font-sans antialiased relative isolate">
+        <div aria-hidden="true" className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]">
+            <div className="absolute left-1/2 top-0 -z-10 h-64 w-64 -translate-x-1/2 rounded-full bg-purple-200/50 opacity-20 blur-3xl"></div>
         </div>
 
       <AppHeader />
