@@ -1,14 +1,14 @@
 'use server';
 
-import { assignEmoji } from '@/ai/flows/assign-emoji';
+import { assignAnimalEmoji } from '@/ai/flows/assign-animal-emoji';
 
-export async function getEmojiForPet(photoDataUri: string) {
+export async function getEmojiForAnimal(photoDataUri: string) {
   if (!photoDataUri) {
     return { success: false, error: 'No photo data provided.' };
   }
 
   try {
-    const result = await assignEmoji({ photoDataUri });
+    const result = await assignAnimalEmoji({ photoDataUri });
     return { success: true, emoji: result.emoji, comment: result.comment };
   } catch (e) {
     console.error(e);

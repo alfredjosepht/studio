@@ -7,16 +7,16 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { getEmojiForPet } from './actions';
+import { getEmojiForAnimal } from './actions';
 import { cn } from '@/lib/utils';
 
 const ALTERNATIVE_EMOJIS = ['😀', '😂', '😍', '😴', '🤔', '😠', '😮'];
 
-type PetMojiClientProps = {
+type AnimalMojiClientProps = {
   initialEmoji: string | null;
 };
 
-export default function PetMojiClient({ initialEmoji }: PetMojiClientProps) {
+export default function AnimalMojiClient({ initialEmoji }: AnimalMojiClientProps) {
   const [image, setImage] = useState<string | null>(null);
   const [emoji, setEmoji] = useState<string | null>(initialEmoji);
   const [comment, setComment] = useState<string | null>(null);
@@ -50,7 +50,7 @@ export default function PetMojiClient({ initialEmoji }: PetMojiClientProps) {
       setComment(null);
 
       startTransition(async () => {
-        const result = await getEmojiForPet(dataUrl);
+        const result = await getEmojiForAnimal(dataUrl);
         if (result.success) {
           setEmoji(result.emoji);
           setComment(result.comment);
@@ -97,7 +97,7 @@ export default function PetMojiClient({ initialEmoji }: PetMojiClientProps) {
     navigator.clipboard.writeText(url.toString());
     toast({
       title: 'Link Copied!',
-      description: 'You can now share your pet\'s emoji with friends.',
+      description: 'You can now share your animal\'s emoji with friends.',
     });
   };
 
@@ -109,8 +109,8 @@ export default function PetMojiClient({ initialEmoji }: PetMojiClientProps) {
         <div className="flex items-center justify-center mb-4">
             <PawPrint className="h-12 w-12 text-primary" />
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-headline">PetMoji</h1>
-        <p className="mt-2 text-lg text-muted-foreground">What's your pet really thinking? Upload a pic to find out!</p>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-headline">AnimalMoji</h1>
+        <p className="mt-2 text-lg text-muted-foreground">What's your animal really thinking? Upload a pic to find out!</p>
       </div>
 
       <Card className="overflow-hidden transition-all duration-500">
@@ -140,7 +140,7 @@ export default function PetMojiClient({ initialEmoji }: PetMojiClientProps) {
           ) : (
             <div className="flex flex-col items-center">
               <div className="relative w-full aspect-square max-w-md rounded-lg overflow-hidden shadow-lg mb-6">
-                <Image src={image} alt="User's pet" layout="fill" objectFit="cover" data-ai-hint="pet animal" />
+                <Image src={image} alt="User's animal" layout="fill" objectFit="cover" data-ai-hint="animal" />
                 {isPending && (
                   <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white backdrop-blur-sm">
                     <Loader2 className="w-12 h-12 animate-spin mb-4" />
@@ -158,7 +158,7 @@ export default function PetMojiClient({ initialEmoji }: PetMojiClientProps) {
 
               {!isPending && emoji && (
                 <div className="text-center animate-in fade-in zoom-in-95 duration-500 w-full">
-                  <p className="text-muted-foreground">Our AI says your pet is feeling...</p>
+                  <p className="text-muted-foreground">Our AI says your animal is feeling...</p>
                   <p className="text-8xl my-4">{emoji}</p>
                   {comment && (
                     <p className="text-lg text-foreground mb-6">"{comment}"</p>

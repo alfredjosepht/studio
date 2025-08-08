@@ -9,8 +9,8 @@ export default function Loading() {
         <div className="flex items-center justify-center mb-4">
             <PawPrint className="h-12 w-12 text-primary" />
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">PetMoji</h1>
-        <p className="mt-2 text-lg text-muted-foreground">What's your pet really thinking? Upload a pic to find out!</p>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary">AnimalMoji</h1>
+        <p className="mt-2 text-lg text-muted-foreground">What's your animal really thinking? Upload a pic to find out!</p>
       </div>
       <Card className="w-full max-w-2xl">
         <CardContent className="p-8">

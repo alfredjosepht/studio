@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'PetMoji - What\'s Your Pet Thinking?',
-  description: "Upload a picture of your pet and let our AI guess their personality with an emoji!",
+  title: 'AnimalMoji - What\'s Your Animal Thinking?',
+  description: "Upload a picture of your animal and let our AI guess their personality with an emoji!",
 };
 
 export default function RootLayout({
