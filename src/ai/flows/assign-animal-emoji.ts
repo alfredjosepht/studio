@@ -39,6 +39,8 @@ const prompt = ai.definePrompt({
 2. Describe its real expression or mood in a short, single, descriptive sentence.
 3. Choose a single emoji that best represents this expression.
 
+IMPORTANT: The emoji you choose must represent the animal's *expression*, not its species. For example, for a happy dog, choose an emoji like 😊 or 😄, not 🐶. For a sad cat, choose 😢, not 🐱.
+
 If a face is not clearly visible, make a best guess based on the animal's posture or the overall context of the image. Focus on a realistic interpretation for both the description and the emoji.
 
 Here is the animal's photo: {{media url=photoDataUri}}
