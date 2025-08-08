@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview Analyzes an animal's image to determine its expression.
+ * @fileOverview Analyzes an animal's image to determine its expression and a matching emoji.
  *
  * - getAnimalExpression - A function that handles the expression analysis process.
  * - GetAnimalExpressionInput - The input type for the getAnimalExpression function.
@@ -22,6 +22,7 @@ export type GetAnimalExpressionInput = z.infer<typeof GetAnimalExpressionInputSc
 
 const GetAnimalExpressionOutputSchema = z.object({
   expression: z.string().describe("A short, descriptive sentence about the animal's real expression or mood."),
+  emoji: z.string().describe("A single emoji that best represents the animal's expression."),
 });
 export type GetAnimalExpressionOutput = z.infer<typeof GetAnimalExpressionOutputSchema>;
 
@@ -36,8 +37,9 @@ const prompt = ai.definePrompt({
   prompt: `You are an AI that analyzes a picture of an animal. Your task is to:
 1. Observe the animal's facial features, posture, and the context of the image.
 2. Describe its real expression or mood in a short, single, descriptive sentence.
+3. Choose a single emoji that best represents this expression.
 
-If a face is not clearly visible, make a best guess based on the animal's posture or the overall context of the image. Do not use emojis. Focus on a realistic interpretation.
+If a face is not clearly visible, make a best guess based on the animal's posture or the overall context of the image. Focus on a realistic interpretation for both the description and the emoji.
 
 Here is the animal's photo: {{media url=photoDataUri}}
 `,
@@ -56,6 +58,7 @@ const getAnimalExpressionFlow = ai.defineFlow(
     }
     return {
       expression: output.expression,
+      emoji: output.emoji,
     };
   }
 );
