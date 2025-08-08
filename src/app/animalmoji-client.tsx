@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Upload, X, HelpCircle, Image as ImageIcon, Wand2, PartyPopper, RefreshCw, File, ServerCrash, RotateCcw, AlertTriangle } from 'lucide-react';
+import { Upload, X, HelpCircle, Image as ImageIcon, Wand2, PartyPopper, RefreshCw, File, ServerCrash, RotateCcw, AlertTriangle, PawPrint } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast"
 
 type AppState = 'upload' | 'preview' | 'analyzing' | 'results';
@@ -101,7 +101,7 @@ export default function AnimalMojiClient() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between">
         <div className="flex items-center gap-2">
-          <Wand2 className="h-6 w-6 text-primary" />
+          <PawPrint className="h-6 w-6 text-primary" />
           <span className="font-bold text-lg">AnimalMoji</span>
         </div>
         <Dialog>
@@ -148,12 +148,12 @@ export default function AnimalMojiClient() {
   const HeroSection = () => (
     <div className="text-center my-12 md:my-20">
       <div className="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-sm font-medium mb-4">
-        <Wand2 className="h-4 w-4 mr-2 text-primary" />
+        <PawPrint className="h-4 w-4 mr-2 text-primary" />
         AI-Powered Analysis
       </div>
       <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4">
         Discover Your Animal's
-        <span className="block bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Emoji Personality</span>
+        <span className="block bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">😻 Emoji Personality</span>
       </h1>
       <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
         Upload a photo of your furry (or scaly) friend and let our advanced AI reveal their unique expression through the perfect emoji match.
@@ -169,7 +169,7 @@ export default function AnimalMojiClient() {
         onDrop={handleDrop}
       >
       <CardHeader className="text-center">
-        <CardTitle>Upload Your Animal's Photo</CardTitle>
+        <CardTitle>Upload Your Animal's Photo 🐾</CardTitle>
         <CardDescription>For best results, use a clear photo of the animal's face.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -183,7 +183,7 @@ export default function AnimalMojiClient() {
           <input type="file" ref={fileInputRef} accept="image/*" hidden onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)} />
         </div>
         <Button className="w-full" size="lg" onClick={() => fileInputRef.current?.click()}>
-          <ImageIcon className="mr-2 h-5 w-5"/>
+          <PawPrint className="mr-2 h-5 w-5"/>
           Choose Photo
         </Button>
       </CardContent>
@@ -245,12 +245,12 @@ export default function AnimalMojiClient() {
     return (
         <Card className="max-w-2xl mx-auto text-center">
             <CardHeader>
-                <CardTitle>Analyzing...</CardTitle>
+                <CardTitle>Analyzing... 🐾</CardTitle>
                 <CardDescription>Our AI is working its magic!</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center p-12 space-y-6">
                 <div className="relative">
-                    <Wand2 className="h-16 w-16 text-primary animate-pulse"/>
+                    <PawPrint className="h-16 w-16 text-primary animate-spin"/>
                 </div>
                 <Progress value={progress} className="w-full" />
                 <p className="text-sm text-muted-foreground">Please wait a moment.</p>
