@@ -268,7 +268,7 @@ export default function AnimalMojiClient() {
             </div>
         </CardHeader>
         <CardContent className="space-y-6 p-8">
-            <div className="text-8xl p-6 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full w-48 h-48 mx-auto flex items-center justify-center shadow-inner">
+            <div className="text-8xl p-6 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full w-48 h-48 mx-auto flex items-center justify-center shadow-inner animate-bounce">
               {emoji}
             </div>
             <p className="text-2xl font-semibold italic text-muted-foreground">"{expression}"</p>
