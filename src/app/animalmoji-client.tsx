@@ -1,37 +1,22 @@
 "use client";
 
-import { useState, useRef, useEffect, useTransition } from 'react';
+import { useState, useRef, useTransition } from 'react';
 import Image from 'next/image';
-import { UploadCloud, Loader2, Copy, X, PawPrint, WandSparkles } from 'lucide-react';
+import { UploadCloud, Loader2, X, PawPrint, WandSparkles } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
-import { getEmojiForAnimal } from './actions';
+import { getExpressionForAnimal } from './actions';
 import { cn } from '@/lib/utils';
 
-const ALTERNATIVE_EMOJIS = ['😀', '😂', '😍', '😴', '🤔', '😠', '😮'];
-
-type AnimalMojiClientProps = {
-  initialEmoji: string | null;
-};
-
-export default function AnimalMojiClient({ initialEmoji }: AnimalMojiClientProps) {
+export default function AnimalMojiClient() {
   const [image, setImage] = useState<string | null>(null);
-  const [emoji, setEmoji] = useState<string | null>(initialEmoji);
-  const [comment, setComment] = useState<string | null>(null);
+  const [expression, setExpression] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isDragging, setIsDragging] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    if (initialEmoji) {
-      setEmoji(initialEmoji);
-    }
-  }, [initialEmoji]);
 
   const handleFileSelect = (file: File | null) => {
     if (!file) return;
@@ -46,14 +31,12 @@ export default function AnimalMojiClient({ initialEmoji }: AnimalMojiClientProps
       const dataUrl = e.target?.result as string;
       setImage(dataUrl);
       setError(null);
-      setEmoji(null);
-      setComment(null);
+      setExpression(null);
 
       startTransition(async () => {
-        const result = await getEmojiForAnimal(dataUrl);
+        const result = await getExpressionForAnimal(dataUrl);
         if (result.success) {
-          setEmoji(result.emoji);
-          setComment(result.comment);
+          setExpression(result.expression);
         } else {
           setError(result.error);
         }
@@ -78,30 +61,12 @@ export default function AnimalMojiClient({ initialEmoji }: AnimalMojiClientProps
 
   const handleReset = () => {
     setImage(null);
-    setEmoji(null);
-    setComment(null);
+    setExpression(null);
     setError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
   };
-
-  const handleCopyLink = () => {
-    const url = new URL(window.location.href);
-    if (emoji) {
-      url.searchParams.set('emoji', emoji);
-    } else {
-      url.searchParams.delete('emoji');
-    }
-    
-    navigator.clipboard.writeText(url.toString());
-    toast({
-      title: 'Link Copied!',
-      description: 'You can now share your animal\'s emoji with friends.',
-    });
-  };
-
-  const currentEmojis = emoji ? [...new Set([emoji, ...ALTERNATIVE_EMOJIS])] : ALTERNATIVE_EMOJIS;
 
   return (
     <div className="w-full max-w-2xl">
@@ -109,8 +74,8 @@ export default function AnimalMojiClient({ initialEmoji }: AnimalMojiClientProps
         <div className="flex items-center justify-center mb-4">
             <PawPrint className="h-12 w-12 text-primary" />
         </div>
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-headline">AnimalMoji</h1>
-        <p className="mt-2 text-lg text-muted-foreground">What's your animal really thinking? Upload a pic to find out!</p>
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight font-headline">Animal Expression</h1>
+        <p className="mt-2 text-lg text-muted-foreground">What's your animal really feeling? Upload a pic to find out!</p>
       </div>
 
       <Card className="overflow-hidden transition-all duration-500">
@@ -144,7 +109,7 @@ export default function AnimalMojiClient({ initialEmoji }: AnimalMojiClientProps
                 {isPending && (
                   <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white backdrop-blur-sm">
                     <Loader2 className="w-12 h-12 animate-spin mb-4" />
-                    <p className="text-lg font-semibold">Analyzing personality...</p>
+                    <p className="text-lg font-semibold">Analyzing expression...</p>
                   </div>
                 )}
               </div>
@@ -156,32 +121,10 @@ export default function AnimalMojiClient({ initialEmoji }: AnimalMojiClientProps
                 </Alert>
               )}
 
-              {!isPending && emoji && (
+              {!isPending && expression && (
                 <div className="text-center animate-in fade-in zoom-in-95 duration-500 w-full">
                   <p className="text-muted-foreground">Our AI says your animal is feeling...</p>
-                  <p className="text-8xl my-4">{emoji}</p>
-                  {comment && (
-                    <p className="text-lg text-foreground mb-6">"{comment}"</p>
-                  )}
-                  
-                  <div className="mt-4">
-                    <p className="text-sm text-muted-foreground mb-2">Not quite right? Pick another!</p>
-                    <div className="flex justify-center flex-wrap gap-2">
-                      {currentEmojis.map((e) => (
-                        <button
-                          key={e}
-                          onClick={() => setEmoji(e)}
-                          className={cn(
-                            "text-3xl p-2 rounded-full transition-all duration-200",
-                            e === emoji ? 'bg-primary/20 scale-125' : 'hover:bg-accent'
-                          )}
-                          aria-label={`Select emoji ${e}`}
-                        >
-                          {e}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <p className="text-2xl font-semibold my-4 text-foreground">"{expression}"</p>
                 </div>
               )}
             </div>
@@ -192,9 +135,6 @@ export default function AnimalMojiClient({ initialEmoji }: AnimalMojiClientProps
           <CardFooter className="bg-muted/50 p-4 flex flex-col sm:flex-row gap-2 justify-center">
              <Button onClick={handleReset} variant="outline">
               <X className="mr-2" /> Start Over
-            </Button>
-            <Button onClick={handleCopyLink} disabled={!emoji || isPending}>
-              <Copy className="mr-2" /> Copy Share Link
             </Button>
           </CardFooter>
         )}

@@ -1,54 +1,53 @@
 'use server';
 
 /**
- * @fileOverview Assigns an emoji to an animal's image based on its facial expression.
+ * @fileOverview Analyzes an animal's image to determine its expression.
  *
- * - assignAnimalEmoji - A function that handles the emoji assignment process.
- * - AssignAnimalEmojiInput - The input type for the assignAnimalEmoji function.
- * - AssignAnimalEmojiOutput - The return type for the assignAnimalEmoji function.
+ * - getAnimalExpression - A function that handles the expression analysis process.
+ * - GetAnimalExpressionInput - The input type for the getAnimalExpression function.
+ * - GetAnimalExpressionOutput - The return type for the getAnimalExpression function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-const AssignAnimalEmojiInputSchema = z.object({
+const GetAnimalExpressionInputSchema = z.object({
   photoDataUri: z
     .string()
     .describe(
       "A photo of an animal's face, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'"
     ),
 });
-export type AssignAnimalEmojiInput = z.infer<typeof AssignAnimalEmojiInputSchema>;
+export type GetAnimalExpressionInput = z.infer<typeof GetAnimalExpressionInputSchema>;
 
-const AssignAnimalEmojiOutputSchema = z.object({
-  emoji: z.string().describe("The emoji representing the animal's expression or mood."),
-  comment: z.string().describe("A short, fun comment about the animal's expression or mood."),
+const GetAnimalExpressionOutputSchema = z.object({
+  expression: z.string().describe("A short, descriptive sentence about the animal's real expression or mood."),
 });
-export type AssignAnimalEmojiOutput = z.infer<typeof AssignAnimalEmojiOutputSchema>;
+export type GetAnimalExpressionOutput = z.infer<typeof GetAnimalExpressionOutputSchema>;
 
-export async function assignAnimalEmoji(input: AssignAnimalEmojiInput): Promise<AssignAnimalEmojiOutput> {
-  return assignAnimalEmojiFlow(input);
+export async function getAnimalExpression(input: GetAnimalExpressionInput): Promise<GetAnimalExpressionOutput> {
+  return getAnimalExpressionFlow(input);
 }
 
 const prompt = ai.definePrompt({
-  name: 'assignAnimalEmojiPrompt',
-  input: {schema: AssignAnimalEmojiInputSchema},
-  output: {schema: AssignAnimalEmojiOutputSchema},
+  name: 'getAnimalExpressionPrompt',
+  input: {schema: GetAnimalExpressionInputSchema},
+  output: {schema: GetAnimalExpressionOutputSchema},
   prompt: `You are an AI that analyzes a picture of an animal. Your task is to:
-1. Return an emoji that best represents its expression or general mood.
-2. Provide a short, fun, single-sentence comment explaining the emoji choice.
+1. Observe the animal's facial features, posture, and the context of the image.
+2. Describe its real expression or mood in a short, single, descriptive sentence.
 
-If a face is not clearly visible, make a best guess based on the animal's posture or the overall context of the image.
+If a face is not clearly visible, make a best guess based on the animal's posture or the overall context of the image. Do not use emojis. Focus on a realistic interpretation.
 
 Here is the animal's photo: {{media url=photoDataUri}}
 `,
 });
 
-const assignAnimalEmojiFlow = ai.defineFlow(
+const getAnimalExpressionFlow = ai.defineFlow(
   {
-    name: 'assignAnimalEmojiFlow',
-    inputSchema: AssignAnimalEmojiInputSchema,
-    outputSchema: AssignAnimalEmojiOutputSchema,
+    name: 'getAnimalExpressionFlow',
+    inputSchema: GetAnimalExpressionInputSchema,
+    outputSchema: GetAnimalExpressionOutputSchema,
   },
   async input => {
     const {output} = await prompt(input);
@@ -56,8 +55,7 @@ const assignAnimalEmojiFlow = ai.defineFlow(
       throw new Error("The model did not return an output.");
     }
     return {
-      emoji: output.emoji,
-      comment: output.comment,
+      expression: output.expression,
     };
   }
 );
