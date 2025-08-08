@@ -2,12 +2,17 @@
 
 import { useState, useRef, useEffect, useTransition } from 'react';
 import { getExpressionForAnimal } from './actions';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Upload, X, HelpCircle, Image as ImageIcon, Wand2, PartyPopper, RefreshCw, File, ServerCrash, RotateCcw, AlertTriangle } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast"
 
-// Define states for the application
 type AppState = 'upload' | 'preview' | 'analyzing' | 'results';
 
 export default function AnimalMojiClient() {
-  // State management
   const [appState, setAppState] = useState<AppState>('upload');
   const [image, setImage] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>('');
@@ -17,18 +22,19 @@ export default function AnimalMojiClient() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isHelpModalOpen, setHelpModalOpen] = useState(false);
+  const { toast } = useToast();
 
-  // Refs for file input
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const uploadAreaRef = useRef<HTMLDivElement>(null);
 
-  // File handling
   const handleFileSelect = (file: File | null) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-        alert('Please select an image file.');
-        return;
+      toast({
+        variant: "destructive",
+        title: "Invalid File Type",
+        description: "Please select an image file (PNG, JPG, etc.).",
+      })
+      return;
     }
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -42,43 +48,26 @@ export default function AnimalMojiClient() {
     reader.readAsDataURL(file);
   };
   
-  // Drag and drop events
-  useEffect(() => {
-    const uploadArea = uploadAreaRef.current;
-    if (!uploadArea) return;
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      handleFileSelect(files[0]);
+    }
+  };
 
-    const handleDragOver = (e: DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(true);
-    };
-    const handleDragLeave = (e: DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(false);
-    };
-    const handleDrop = (e: DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDragging(false);
-      const files = e.dataTransfer?.files;
-      if (files && files.length > 0) {
-        handleFileSelect(files[0]);
-      }
-    };
-    
-    uploadArea.addEventListener('dragover', handleDragOver);
-    uploadArea.addEventListener('dragleave', handleDragLeave);
-    uploadArea.addEventListener('drop', handleDrop);
-
-    return () => {
-      uploadArea.removeEventListener('dragover', handleDragOver);
-      uploadArea.removeEventListener('dragleave', handleDragLeave);
-      uploadArea.removeEventListener('drop', handleDrop);
-    };
-  }, []);
-
-  // Analysis logic
   const handleAnalyze = () => {
     if (!image) return;
     setAppState('analyzing');
@@ -90,12 +79,11 @@ export default function AnimalMojiClient() {
         setAppState('results');
       } else {
         setError(result.error ?? 'An unknown error occurred.');
-        setAppState('preview'); // Go back to preview on error
+        setAppState('preview');
       }
     });
   };
 
-  // Reset logic
   const handleReset = () => {
     setImage(null);
     setFileName('');
@@ -109,327 +97,198 @@ export default function AnimalMojiClient() {
     }
   };
 
-  // UI Components
   const AppHeader = () => (
-    <header className="app-header">
-      <nav className="nav-container">
-        <div className="nav-brand">
-          <div className="brand-icon">🎭</div>
-          <span className="brand-text">Animal Emojifier</span>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="container flex h-14 items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Wand2 className="h-6 w-6 text-primary" />
+          <span className="font-bold text-lg">AnimalMoji</span>
         </div>
-        <div className="nav-actions">
-          <button id="helpBtn" className="nav-btn" aria-label="Help" onClick={() => setHelpModalOpen(true)}>
-            <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <circle cx="12" cy="12" r="10"></circle>
-              <path d="m9,9a3,3 0 1,1 6,0c0,2 -3,3 -3,3"></path>
-              <path d="m12,17 l.01,0"></path>
-            </svg>
-          </button>
-        </div>
-      </nav>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <HelpCircle className="h-5 w-5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>How It Works</DialogTitle>
+              <DialogDescription>
+                <div className="space-y-4 mt-4 text-left">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">1</div>
+                    <div>
+                      <h4 className="font-semibold">Upload Photo</h4>
+                      <p className="text-sm text-muted-foreground">Choose a clear, well-lit photo of your animal's face.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">2</div>
+                    <div>
+                      <h4 className="font-semibold">AI Analysis</h4>
+                      <p className="text-sm text-muted-foreground">Our AI analyzes facial expressions and features.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">3</div>
+                    <div>
+                      <h4 className="font-semibold">Get Results</h4>
+                      <p className="text-sm text-muted-foreground">Discover your animal's emoji personality match!</p>
+                    </div>
+                  </div>
+                </div>
+              </DialogDescription>
+            </DialogHeader>
+          </DialogContent>
+        </Dialog>
+      </div>
     </header>
   );
 
   const HeroSection = () => (
-    <section id="heroSection" className="hero-section">
-      <div className="hero-content">
-        <div className="hero-badge">
-          <span className="badge-icon">✨</span>
-          <span className="badge-text">AI-Powered Analysis</span>
-        </div>
-        <h1 className="hero-title">
-          Discover Your Animal's
-          <span className="title-highlight"> Emoji Personality</span>
-        </h1>
-        <p className="hero-description">
-          Upload a photo of your furry friend and let our advanced AI reveal their unique personality through the perfect emoji match.
-        </p>
-        <div className="hero-stats">
-          <div className="stat-item">
-            <div className="stat-number">50K+</div>
-            <div className="stat-label">Animals Analyzed</div>
-          </div>
-          <div className="stat-divider"></div>
-          <div className="stat-item">
-            <div className="stat-number">95%</div>
-            <div className="stat-label">Accuracy Rate</div>
-          </div>
-        </div>
+    <div className="text-center my-12 md:my-20">
+      <div className="inline-flex items-center rounded-lg bg-muted px-3 py-1 text-sm font-medium mb-4">
+        <Wand2 className="h-4 w-4 mr-2 text-primary" />
+        AI-Powered Analysis
       </div>
-    </section>
+      <h1 className="text-4xl md:text-6xl font-bold tracking-tighter mb-4">
+        Discover Your Animal's
+        <span className="block bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Emoji Personality</span>
+      </h1>
+      <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
+        Upload a photo of your furry (or scaly) friend and let our advanced AI reveal their unique expression through the perfect emoji match.
+      </p>
+    </div>
   );
 
   const UploadSection = () => (
-    <section id="uploadSection" className="upload-section">
-      <div className="section-container">
-        <div className="upload-card">
-          <div className="upload-header">
-            <h2 className="section-title">Upload Your Animal's Photo</h2>
-            <p className="section-subtitle">Best results with clear, well-lit photos showing your animal's face</p>
-          </div>
-          
-          <div id="uploadArea" ref={uploadAreaRef} className={`upload-area ${isDragging ? 'drag-over' : ''}`} onClick={() => fileInputRef.current?.click()}>
-            <div className="upload-content">
-              <div className="upload-icon-container">
-                <div className="upload-icon">📸</div>
-                <div className="upload-pulse"></div>
-              </div>
-              <h3 className="upload-title">Drop your photo here</h3>
-              <p className="upload-subtitle">or click to browse files</p>
-              <div className="upload-specs">
-                <span className="spec-item">• JPG, PNG, or WEBP</span>
-                <span className="spec-item">• Max 10MB</span>
-                <span className="spec-item">• Square format preferred</span>
-              </div>
-            </div>
-            <input type="file" ref={fileInputRef} id="imageUpload" accept="image/*" hidden onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)} />
-          </div>
-          
-          <button id="uploadBtn" className="btn btn-primary btn-large" onClick={() => fileInputRef.current?.click()}>
-            <span className="btn-icon">📷</span>
-            <span className="btn-text">Choose Photo</span>
-          </button>
+    <Card 
+        className={`max-w-2xl mx-auto transition-all duration-300 ${isDragging ? 'border-primary shadow-lg' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+      <CardHeader className="text-center">
+        <CardTitle>Upload Your Animal's Photo</CardTitle>
+        <CardDescription>For best results, use a clear photo of the animal's face.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div 
+          className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg cursor-pointer hover:bg-accent hover:border-primary"
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <Upload className="h-12 w-12 text-muted-foreground mb-4"/>
+          <p className="font-semibold">Drag & drop or click to upload</p>
+          <p className="text-sm text-muted-foreground">JPG, PNG, WEBP. Max 10MB.</p>
+          <input type="file" ref={fileInputRef} accept="image/*" hidden onChange={(e) => handleFileSelect(e.target.files?.[0] ?? null)} />
         </div>
-      </div>
-    </section>
+        <Button className="w-full" size="lg" onClick={() => fileInputRef.current?.click()}>
+          <ImageIcon className="mr-2 h-5 w-5"/>
+          Choose Photo
+        </Button>
+      </CardContent>
+    </Card>
   );
 
   const PreviewSection = () => (
-    <section id="previewSection" className="preview-section">
-        <div className="section-container">
-            <div className="preview-card">
-                <div className="preview-header">
-                    <h2 className="section-title">Photo Preview</h2>
-                    <button id="changePhotoBtn" className="btn btn-outline btn-small" onClick={handleReset}>
-                        <span className="btn-icon">🔄</span>
-                        <span className="btn-text">Change Photo</span>
-                    </button>
-                </div>
-                
-                <div className="image-preview-container">
-                    <div className="image-wrapper">
-                        {image && <img id="previewImage" alt="Animal preview" className="preview-image" src={image} />}
-                        <div className="image-overlay">
-                             <button id="removeBtn" className="remove-btn" aria-label="Remove image" onClick={handleReset}>
-                                <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div className="image-info">
-                        <div className="info-item">
-                            <span className="info-label">File:</span>
-                            <span id="fileName" className="info-value">{fileName}</span>
-                        </div>
-                        <div className="info-item">
-                            <span className="info-label">Size:</span>
-                            <span id="fileSize" className="info-value">{fileSize}</span>
-                        </div>
-                        <div className="quality-indicator">
-                            <span className="quality-label">Quality:</span>
-                            <div className="quality-bars">
-                                <div className="quality-bar active"></div>
-                                <div className="quality-bar active"></div>
-                                <div className="quality-bar active"></div>
-                                <div className="quality-bar"></div>
-                                <div className="quality-bar"></div>
-                            </div>
-                            <span className="quality-text">Good</span>
-                        </div>
-                    </div>
-                </div>
-                 {error && (
-                    <div style={{ color: 'var(--error-500)', marginBottom: 'var(--space-4)'}}>
-                        <strong>Analysis Failed:</strong> {error}
-                    </div>
-                 )}
-                <div className="preview-actions">
-                    <button id="analyzeBtn" className="btn btn-success btn-large" onClick={handleAnalyze}>
-                        <span className="btn-icon">🔮</span>
-                        <span className="btn-text">Analyze Personality</span>
-                        <div className="btn-shine"></div>
-                    </button>
-                </div>
-            </div>
+    <Card className="max-w-2xl mx-auto">
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle>Photo Preview</CardTitle>
+          <Button variant="ghost" onClick={handleReset}><RotateCcw className="mr-2 h-4 w-4" />Change</Button>
         </div>
-    </section>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="relative aspect-square w-full rounded-lg overflow-hidden border">
+          {image && <img src={image} alt="Animal preview" className="w-full h-full object-cover" />}
+           <Button variant="destructive" size="icon" className="absolute top-2 right-2 h-8 w-8" onClick={handleReset}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="flex items-center text-sm bg-muted p-3 rounded-lg">
+          <File className="h-5 w-5 mr-3 text-muted-foreground" />
+          <p className="font-mono text-xs truncate mr-4 flex-1">{fileName}</p>
+          <p className="font-semibold">{fileSize}</p>
+        </div>
+         {error && (
+            <Alert variant="destructive">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Analysis Failed</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+         )}
+        <Button className="w-full" size="lg" onClick={handleAnalyze}>
+          <Wand2 className="mr-2 h-5 w-5"/>
+          Analyze Personality
+        </Button>
+      </CardContent>
+    </Card>
   );
 
     const AnalysisSection = () => {
-    const [progress, setProgress] = useState(0);
-    const [step, setStep] = useState('Initializing...');
+      const [progress, setProgress] = useState(0);
 
-    useEffect(() => {
-        const steps = ['Uploading image', 'Detecting features', 'AI analysis', 'Generating results'];
-        let currentProgress = 0;
-        const interval = setInterval(() => {
-            currentProgress += 1;
-            setProgress(currentProgress);
-            
-            if (currentProgress < 25) setStep(steps[0]);
-            else if (currentProgress < 50) setStep(steps[1]);
-            else if (currentProgress < 75) setStep(steps[2]);
-            else if (currentProgress < 100) setStep(steps[3]);
+      useEffect(() => {
+          const interval = setInterval(() => {
+              setProgress(prev => {
+                  if (prev >= 99) {
+                    if(!isPending) clearInterval(interval);
+                    return 99;
+                  }
+                  return prev + 1
+              });
+          }, 50);
 
-            if (currentProgress >= 100) {
-                 if(!isPending) clearInterval(interval);
-                 else currentProgress = 99; // Hold at 99% until backend is done
-            }
-        }, 50);
-
-        return () => clearInterval(interval);
-    }, [isPending]);
+          return () => clearInterval(interval);
+      }, [isPending]);
 
     return (
-        <section id="analysisSection" className="analysis-section">
-            <div className="section-container">
-                <div className="analysis-card">
-                    <div className="analysis-visual">
-                        <div className="scanning-animation">
-                            <div className="scan-circle">
-                                <div className="scan-line"></div>
-                            </div>
-                        </div>
-                        <div className="analysis-pet-icon">🐾</div>
-                    </div>
-                    
-                    <div className="analysis-content">
-                        <h2 className="analysis-title">Analyzing Your Animal's Personality</h2>
-                        <p className="analysis-subtitle">Our AI is examining facial features, expressions, and body language...</p>
-                        
-                        <div className="progress-container">
-                            <div className="progress-bar">
-                                <div className="progress-fill" id="progressFill" style={{ width: `${progress}%` }}></div>
-                            </div>
-                            <div className="progress-text">
-                                <span id="progressPercent">{progress}%</span>
-                                <span id="progressStep">{step}</span>
-                            </div>
-                        </div>
-                        
-                        <div className="analysis-steps">
-                            <div className={`step-item ${progress >= 0 ? 'active' : ''}`}>
-                                <div className="step-icon">📤</div>
-                                <span className="step-text">Uploading</span>
-                            </div>
-                            <div className={`step-item ${progress >= 25 ? 'active' : ''}`}>
-                                <div className="step-icon">🔍</div>
-                                <span className="step-text">Detecting</span>
-                            </div>
-                            <div className={`step-item ${progress >= 50 ? 'active' : ''}`}>
-                                <div className="step-icon">🧠</div>
-                                <span className="step-text">AI analysis</span>
-                            </div>
-                            <div className={`step-item ${progress >= 75 ? 'active' : ''}`}>
-                                <div className="step-icon">✨</div>
-                                <span className="step-text">Generating</span>
-                            </div>
-                        </div>
-                    </div>
+        <Card className="max-w-2xl mx-auto text-center">
+            <CardHeader>
+                <CardTitle>Analyzing...</CardTitle>
+                <CardDescription>Our AI is working its magic!</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center justify-center p-12 space-y-6">
+                <div className="relative">
+                    <Wand2 className="h-16 w-16 text-primary animate-pulse"/>
                 </div>
-            </div>
-        </section>
+                <Progress value={progress} className="w-full" />
+                <p className="text-sm text-muted-foreground">Please wait a moment.</p>
+            </CardContent>
+        </Card>
     );
   };
 
   const ResultsSection = () => (
-    <section id="resultsSection" className="results-section">
-      <div className="section-container">
-        <div className="results-card">
-          <div className="results-header">
-            <div className="success-badge">
-              <span className="badge-icon">✅</span>
-              <span className="badge-text">Analysis Complete</span>
+    <Card className="max-w-2xl mx-auto text-center">
+        <CardHeader>
+            <div className="flex justify-center items-center">
+                <PartyPopper className="h-6 w-6 mr-2 text-green-500"/>
+                <CardTitle>Analysis Complete!</CardTitle>
             </div>
-          </div>
-          
-          <div className="personality-display">
-            <div className="emoji-container">
-              <div className="emoji-result" id="emojiResult">{emoji}</div>
+        </CardHeader>
+        <CardContent className="space-y-6 p-8">
+            <div className="text-8xl p-6 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full w-48 h-48 mx-auto flex items-center justify-center shadow-inner">
+              {emoji}
             </div>
-            
-            <div className="personality-info">
-              <p id="personalityDesc" className="personality-description">"{expression}"</p>
-            </div>
-          </div>
-          
-          <div className="results-actions">
-            <button id="newAnalysisBtn" className="btn btn-primary" onClick={handleReset}>
-              <span className="btn-icon">🔄</span>
-              <span className="btn-text">New Analysis</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    </section>
+            <p className="text-2xl font-semibold italic text-muted-foreground">"{expression}"</p>
+            <Button className="w-full" size="lg" onClick={handleReset}>
+                <RefreshCw className="mr-2 h-5 w-5"/>
+                Analyze Another
+            </Button>
+        </CardContent>
+    </Card>
   );
 
-  const AppFooter = () => (
-    <footer className="app-footer">
-        <div className="footer-content">
-            <div className="footer-info">
-            </div>
-        </div>
-    </footer>
-  );
-
-  const HelpModal = () => (
-    <div id="helpModal" className={`modal ${isHelpModalOpen ? '' : 'hidden'}`}>
-      <div className="modal-overlay" onClick={() => setHelpModalOpen(false)}></div>
-      <div className="modal-content">
-        <div className="modal-header">
-          <h3 className="modal-title">How It Works</h3>
-          <button id="closeHelpBtn" className="modal-close" aria-label="Close" onClick={() => setHelpModalOpen(false)}>
-            <svg className="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <line x1="18" y1="6" x2="6" y2="18"></line>
-              <line x1="6" y1="6" x2="18" y2="18"></line>
-            </svg>
-          </button>
-        </div>
-        <div className="modal-body">
-          <div className="help-steps">
-            <div className="help-step">
-              <div className="step-number">1</div>
-              <div className="step-content">
-                <h4>Upload Photo</h4>
-                <p>Choose a clear, well-lit photo of your animal's face</p>
-              </div>
-            </div>
-            <div className="help-step">
-              <div className="step-number">2</div>
-              <div className="step-content">
-                <h4>AI Analysis</h4>
-                <p>Our AI analyzes facial expressions and features</p>
-              </div>
-            </div>
-            <div className="help-step">
-              <div className="step-number">3</div>
-              <div className="step-content">
-                <h4>Get Results</h4>
-                <p>Discover your animal's emoji personality match!</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Main render logic
   return (
-    <div id="app" className="app-container">
-      <div className="background-pattern"></div>
-      <div className="floating-shapes">
-        <div className="shape shape-1"></div>
-        <div className="shape shape-2"></div>
-        <div className="shape shape-3"></div>
-      </div>
-      
+    <div className="min-h-screen bg-background font-sans antialiased relative">
+        <div className="absolute inset-0 -z-10 h-full w-full bg-white bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:6rem_4rem]">
+          <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_500px_at_50%_200px,#fbe2e3,transparent)]"></div>
+        </div>
+
       <AppHeader />
 
-      <main className="main-content">
+      <main className="container mx-auto px-4 py-8 md:py-12">
         {appState !== 'analyzing' && appState !== 'results' && <HeroSection />}
         {appState === 'upload' && <UploadSection />}
         {appState === 'preview' && <PreviewSection />}
@@ -437,8 +296,6 @@ export default function AnimalMojiClient() {
         {appState === 'results' && <ResultsSection />}
       </main>
 
-      <AppFooter />
-      <HelpModal />
     </div>
   );
 }
