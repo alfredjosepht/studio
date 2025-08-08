@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useTransition } from 'react';
@@ -260,18 +261,25 @@ export default function AnimalMojiClient() {
   };
 
   const ResultsSection = () => (
-    <Card className="max-w-2xl mx-auto text-center">
-        <CardHeader>
+    <Card className="max-w-4xl mx-auto">
+        <CardHeader className="text-center">
             <div className="flex justify-center items-center">
                 <PartyPopper className="h-6 w-6 mr-2 text-green-500"/>
                 <CardTitle>Analysis Complete!</CardTitle>
             </div>
         </CardHeader>
         <CardContent className="space-y-6 p-8">
-            <div className="text-8xl p-6 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full w-48 h-48 mx-auto flex items-center justify-center shadow-inner animate-bounce">
-              {emoji}
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div className="relative aspect-square w-full rounded-lg overflow-hidden border">
+                {image && <img src={image} alt="Animal result" className="w-full h-full object-cover" />}
+              </div>
+              <div className="flex flex-col items-center text-center">
+                <div className="text-8xl p-6 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full w-48 h-48 mx-auto flex items-center justify-center shadow-inner animate-bounce">
+                  {emoji}
+                </div>
+                <p className="text-2xl font-semibold italic text-muted-foreground mt-6">"{expression}"</p>
+              </div>
             </div>
-            <p className="text-2xl font-semibold italic text-muted-foreground">"{expression}"</p>
             <Button className="w-full" size="lg" onClick={handleReset}>
                 <RefreshCw className="mr-2 h-5 w-5"/>
                 Analyze Another
