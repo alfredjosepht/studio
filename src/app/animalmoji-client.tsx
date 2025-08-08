@@ -370,7 +370,6 @@ export default function AnimalMojiClient() {
     <footer className="app-footer">
         <div className="footer-content">
             <div className="footer-info">
-                <p>Made with ❤️ using Firebase & AI</p>
             </div>
         </div>
     </footer>
